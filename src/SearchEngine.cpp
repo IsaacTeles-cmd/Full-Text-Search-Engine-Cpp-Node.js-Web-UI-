@@ -6,8 +6,10 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <string>
 
 using namespace std;
+
 
 string SearchEngine::normalize(string word){
     string cleanWord = "";
@@ -15,7 +17,7 @@ string SearchEngine::normalize(string word){
     for(char c : word){
         // Punctuation check
         if(!ispunct((unsigned char)c)){
-            cleanWord += tolower((unsigned char)c); // Enable special characters.
+            cleanWord += tolower((unsigned char)c); // Enable special characters.   
         }
     }
     return cleanWord;
@@ -25,7 +27,7 @@ void SearchEngine::indexFile(const string& filename){
     ifstream file(filename);
 
     if(!file.is_open()){
-        cout << "Error opening file: " << filename << endl;
+        cerr << "Error opening file: " << filename << endl;
         return; // Exit the function if the file does not exist.
     }
 
@@ -43,7 +45,7 @@ void SearchEngine::indexFile(const string& filename){
     }
 }
 
-void SearchEngine::search(const string& query){
+std::vector<Result> SearchEngine::search(const std::string& query){
     stringstream ss(query);
     string word;
     vector<string> words;
@@ -56,14 +58,8 @@ void SearchEngine::search(const string& query){
         }
     }
 
-    if(words.empty()){
-        cout << "Invalid search." << endl;
-        return;
-    }
-
-    if(documents.empty()){
-        cout << "No documents indexed." << endl;
-        return;
+    if(words.empty() || documents.empty()){
+        return {};
     }
 
     map<string, double> scores;
@@ -88,23 +84,20 @@ void SearchEngine::search(const string& query){
         }
     }
 
-    if(scores.empty()){
-        cout << "No results found." << endl;
-        return;
+    vector<Result> results;
+
+    for(const auto& pair : scores){
+        if(pair.second > 0.01){
+        results.push_back({pair.first, pair.second});
+        }
     }
 
-    // Sort documents by their calculated score (descending)
-    vector<pair<string, double>> ranked(scores.begin(), scores.end());
-
-    sort(ranked.begin(), ranked.end(), [](const auto& a, const auto& b){
-        return a.second > b.second;
-    });
-
-    cout << "Results for '" << query << "':\n";
-
-    for(const auto& pair : ranked){
-        cout << "- " << pair.first << " (score: " << pair.second << ")\n";
-    }
+     std::sort(results.begin(), results.end(),
+        [](const Result& a, const Result& b){
+            return a.score > b.score;
+        }
+    );
+    return results;
 }
 
 // Export index.dat
@@ -112,7 +105,7 @@ void SearchEngine::saveIndex(const string& filename){
     ofstream out(filename);
 
     if(!out.is_open()){
-        cout << "Error saving index.\n";
+        cerr << "Error saving index.\n";
         return;
     }
 
@@ -125,8 +118,6 @@ void SearchEngine::saveIndex(const string& filename){
 
         out << "\n";
     }
-
-    cout << "Index saved successfully.\n";
 }
 
 // Import index.dat
@@ -134,7 +125,6 @@ void SearchEngine::loadIndex(const string& filename){
     ifstream in(filename);
 
     if(!in.is_open()){
-        cout << "No saved index found.\n";
         return;
     }
 
@@ -157,11 +147,32 @@ void SearchEngine::loadIndex(const string& filename){
             documents.insert(file);
         }
     }
-
-    cout << "Index loaded successfully.\n";
 }
 
 // Returns true if the index is currently empty
 bool SearchEngine::isEmpty() const {
     return index.empty();
+}
+
+std::vector<std::string> SearchEngine::autocomplete(const std::string& prefix){
+    std::vector<std::string> suggestions;
+
+    std::string clean = normalize(prefix);
+
+    for(const auto& [word, _] : index){ // Prefix: I'm crying. . .
+        if(word.find(clean) == 0){
+            suggestions.push_back(word);
+        }
+    }
+
+    // Limit suggestions.
+    if(suggestions.size() > 10)
+        suggestions.resize(10);
+
+    return suggestions;
+}
+
+void SearchEngine::clear(){
+    index.clear();
+    documents.clear();
 }

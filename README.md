@@ -1,132 +1,192 @@
-# Mini Search Engine (C++)
+# Full-Text Search Engine (C++ + Node.js + Web UI)
 
-A simple yet powerful command-line (Gathering the courage to create an interface) search engine built in C++, featuring multi-word search, TF-IDF ranking, and persistent indexing.
+## Description
+
+A full-text search engine built from scratch in C++, featuring an inverted index and TF-IDF ranking.  
+The project is integrated with a Node.js backend and a clean web interface that supports search, autocomplete, and reindexing. 
+I started this project intending it to be just a basic CLI engine, 
+but after a friend almost kicked my- scolded me for noticing it could be improved, here it is. 
+I hope I didn't get carried away; I learned a lot during this project.
+
+This project demonstrates core concepts of information retrieval, backend integration, and frontend development.
 
 ---
 
 ## Features
 
-* Multi-word search (AND logic)
-* TF-IDF based ranking system
-* Persistent index (saved to disk)
-* Fast search using inverted index
-* Text normalization (case-insensitive and punctuation removal)
-* Reindex command to update data
+- Inverted index implementation
+- TF-IDF based ranking
+- Persistent index storage (`index.dat`)
+- Command-line interface with query arguments
+- REST API using Node.js
+- Web interface with:
+  - Search functionality
+  - Autocomplete (with debounce)
+  - Dark mode
+  - Reindex button
+- JSON-based communication between C++ and Node.js
+- Accent-insensitive search (basic normalization)
+
+---
+
+## Architecture
+
+Frontend (HTML/CSS/JS)  
+↓  
+Node.js (Express API)  
+↓  
+C++ Search Engine (CLI)
 
 ---
 
 ## How It Works
 
-The engine builds an inverted index, mapping each word to the files where it appears, along with its frequency.
-
-Search results are ranked using a simplified TF-IDF approach:
-
-* TF (Term Frequency): how many times a word appears in a document
-* IDF (Inverse Document Frequency): gives more importance to rare words
-
-This allows the engine to return more relevant results first, similar to real-world search systems.
+1. Text files are indexed using an inverted index.
+2. The index is stored on disk for faster queries.
+3. Queries are processed using TF-IDF scoring.
+4. The Node.js server executes the C++ binary using `execFile`.
+5. Results are returned as JSON and displayed in the web interface.
 
 ---
 
-## Usage
+## Endpoints
 
-* Search:
+### GET /search?q=term
+Returns ranked search results.
 
-```id="7e6n3g"
-hello world
-```
+### GET /autocomplete?q=prefix
+Returns suggestions based on indexed terms.
 
-* Reindex:
-
-```id="a0l5cu"
-reindex
-```
-
-* Exit:
-
-```id="g8r9pn"
-exit
-```
+### POST /reindex
+Rebuilds the index from source files.
 
 ---
 
-## Example Output
+## Project Structure
+project/
+├── backend/
+│ ├── server.js
+│ ├── index.html
+│ └── assets/
+├── src/
+│ ├── main.cpp
+│ ├── SearchEngine.cpp
+│ └── SearchEngine.h
+├── data/
+│ ├── file1.txt
+│ └── file2.txt
+├── storage/
+│ └── index.dat
+├── bin/
+│ └── search_engine
+└── README.md
 
-```
-Results for 'hello world':
-- file1.txt (score: 1.82)
-- file2.txt (score: 0.91)
-```
 
 ---
 
-## Technologies
+## How to Run
 
-* C++
-* STL (map, set, vector)
-* File I/O
-* Basic Information Retrieval concepts
+### 1. Compile the C++ engine
+g++ src/main.cpp src/SearchEngine.cpp -o bin/search_engine
+
+### 2. Start the server
+cd backend
+node server.js
+
+### 3. Open in browser
+http://localhost:3000
+
 
 ---
 
-# Motor de Busca Simples (C++)
+## Notes
 
-Um motor de busca em linha de comando (criando coragem para fazer uma interface) desenvolvido em C++, com suporte a múltiplas palavras, ranking por relevância (TF-IDF) e persistência de dados.
+- Reindexing is required after modifying source files.
+- File paths are relative to the project root.
+- The system uses simple text normalization and may not fully support all Unicode cases.
+
+
+---
+
+# Motor de Busca Full-Text (C++ + Node.js + Interface Web)
+
+## Descrição
+
+Um motor de busca full-text desenvolvido em C++, utilizando índice invertido e ranking por TF-IDF.  
+O projeto é integrado com um backend em Node.js e uma interface web com busca, autocomplete e reindexação. 
+Fiz esse projeto com o intuito de ser apenas um motor básico CLI, 
+porém depois de tomar um esporro de um amigo falando que dava pra melhorar isso, ta ai, 
+tomare que não tenha me empolgado, aprendi muita coisa ao longo desse projeto.
 
 ---
 
 ## Funcionalidades
 
-* Busca por múltiplas palavras (lógica AND)
-* Ranking baseado em TF-IDF
-* Índice persistente (salvo em arquivo)
-* Busca rápida com índice invertido
-* Normalização de texto (sem distinção de maiúsculas/minúsculas)
-* Comando de reindexação
+- Índice invertido
+- Ranking com TF-IDF
+- Persistência (`index.dat`)
+- Interface CLI com argumentos
+- API REST com Node.js
+- Interface web com:
+  - Busca
+  - Autocomplete
+  - Modo escuro
+  - Botão de reindex
+- Comunicação em JSON entre C++ e Node.js
+- Busca sem acento (normalização básica)
+
+---
+
+## Arquitetura
+
+Frontend (HTML/CSS/JS)  
+↓  
+Node.js (Express)  
+↓  
+Motor de Busca em C++
 
 ---
 
 ## Como Funciona
 
-O sistema constrói um índice invertido, associando cada palavra aos arquivos em que aparece, incluindo sua frequência.
-
-Os resultados são ordenados usando TF-IDF:
-
-* TF: frequência da palavra no documento
-* IDF: importância da palavra baseada em sua raridade
-
-Isso permite retornar resultados mais relevantes primeiro.
+1. Arquivos são indexados em um índice invertido.
+2. O índice é salvo em disco.
+3. A busca usa TF-IDF para ranqueamento.
+4. O Node executa o binário C++.
+5. Os resultados são retornados em JSON.
 
 ---
 
-## Uso
+## Endpoints
 
-* Buscar:
+### GET /search?q=termo
+Retorna resultados ranqueados.
 
-```id="4vyl9h"
-hello world
-```
+### GET /autocomplete?q=prefixo
+Retorna sugestões.
 
-* Reindexar:
-
-```id="w3e4nt"
-reindex
-```
-
-* Sair:
-
-```id="c8kzbm"
-exit
-```
+### POST /reindex
+Reconstrói o índice.
 
 ---
 
-## Exemplo
+## Como Executar
 
-```id="z8e5gk"
-Resultados para 'hello world':
-- file1.txt (score: 1.82)
-- file2.txt (score: 0.91)
-```
+### 1. Compilar
+g++ src/main.cpp src/SearchEngine.cpp -o bin/search_engine
+
+### 2. Rodar servidor
+cd backend
+node server.js
+
+### 3. Abrir no navegador
+http://localhost:3000
+
 
 ---
+
+## Observações
+
+- É necessário reindexar após alterar arquivos
+- Caminhos são relativos ao projeto
+- Suporte Unicode é limitado

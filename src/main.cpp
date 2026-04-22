@@ -1,51 +1,62 @@
 #include <iostream>
 #include "SearchEngine.h"
+#include <string>
 
 using namespace std;
 
-int main(){
+void performIndexing(SearchEngine& engine) {
+    engine.clear();
+    engine.indexFile("../data/file1.txt");
+    engine.indexFile("../data/file2.txt");
+    engine.saveIndex("../storage/index.dat");
+}
+
+int main(int argc, char* argv[]){
 
     SearchEngine engine;
-
-    cout << "Loading index . . .\n";
     engine.loadIndex("../storage/index.dat");
 
-    if(engine.isEmpty()){
-
-        cout << "No index found. Indexing files . . .\n";
-
-        engine.indexFile("../data/file1.txt");
-        engine.indexFile("../data/file2.txt");
-        engine.saveIndex("../storage/index.dat");
-    } else {
-        cout << "Index loaded successfully.\n";
+    if (engine.isEmpty()) {
+        performIndexing(engine);
     }
 
-    string searchWord;
-    cout << "--- SEARCH ENGINE ---" << endl;
+    string firstArg = argv[1];
 
-
-    while(true){
-        cout << "\nWhat do you want to search for? (or type 'exit' to quit): ";
-        getline(cin, searchWord);
-
-        if(searchWord == "reindex"){ // Command to update the index; the new index will be used for the next search.
-            engine.indexFile("../data/file1.txt");
-            engine.indexFile("../data/file2.txt");
-            engine.saveIndex("../storage/index.dat");
-            continue;
-        }
-
-        if(searchWord == "exit"){
-            cout << "Closing program. . ." << endl;
-            break;
-        }
-
-        engine.search(searchWord);
-
-        cout << "---------------------------------------" << endl;
-
+    // Supports multiple words
+    string query;
+    for(int i = 1; i < argc; i++){
+        query += argv[i];
+        if(i != argc - 1) query += " ";
     }
+
+    if (firstArg == "reindex") {
+        performIndexing(engine);
+        cout << "{ \"status\": \"reindex completed\" }" << endl;
+        return 0;
+    }
+
+    // Autocomplete implemented (FINALLY)
+    if (firstArg == "--autocomplete" && argc >= 3) {
+        string prefix = argv[2];
+        auto suggestions = engine.autocomplete(prefix);
+
+        cout << "[";
+        for (size_t i = 0; i < suggestions.size(); i++) {
+            cout << "\"" << suggestions[i] << "\"" << (i == suggestions.size() - 1 ? "" : ",");
+        }
+        cout << "]" << endl;
+        return 0;
+    }
+
+    auto results = engine.search(query);
+
+    // Return JSON
+    cout << "[";
+    for (size_t i = 0; i < results.size(); i++) {
+        cout << "{ \"file\": \"" << results[i].file << "\", \"score\": " << results[i].score << " }";
+        if (i != results.size() - 1) cout << ",";
+    }
+    cout << "]" << endl;
 
     return 0;
 }

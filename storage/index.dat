@@ -1,3 +1,1 @@
-example ../data/file1.txt 2 ../data/file2.txt 2
-idea ../data/file2.txt 8
-world ../data/file1.txt 2
+ideia data/file1.txt 1
