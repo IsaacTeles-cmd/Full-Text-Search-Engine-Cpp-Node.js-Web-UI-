@@ -193,4 +193,4 @@ http://localhost:3000
 
 ## Demo
 
-![Demo](./assets/IndexLookupDemoGif.gif)
+![Demo](assets/IndexLookupDemoGif.gif)
